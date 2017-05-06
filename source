@@ -1,0 +1,18 @@
+%Setting up increments in x and y direction for discretization of the
+%problem
+% number of points have been increased by 2 in each direction for 
+
+x = linspace(-pi,pi,m+2);
+y = linspace(-pi,pi,n+2);
+
+% Making a Grid of F
+
+[Y,X] = meshgrid(y,x); 
+  
+ F=sin(pi*((X-ax)/(bx-ax))).*cos(pi/2*(2*((Y-ay)/(by-ay))+1));
+ F=-F;
+% The solution grid of the given problem for initial guesses are set up in
+% the Matrix U
+U = ones(m+2,n+2); % This sets up solution grid with all the places with ones 
+                   % set up for first iteration
+                   
