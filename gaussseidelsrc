@@ -1,0 +1,149 @@
+% The solution of Poisson equaution APc2-3 is arrived at by applying
+% following Matlab Code
+
+
+% Asking for number of nodes in each of x and y direction for the creation
+% of desired array.
+% equal number of grids necessary
+
+m=input('m=');
+
+
+n= input('n=');
+
+%Definig upper and lower limits in x and y direction
+  
+  ax = -pi;
+  ay = -pi;
+  bx =  pi;
+  by =  pi;
+  
+
+
+%Setting up increments in x and y direction for discretization of the
+%problem
+% number of points have been increased by 2 in each direction for 
+
+x = linspace(-pi,pi,m+2);
+y = linspace(-pi,pi,n+2);
+
+% Making a Grid of F
+
+[Y,X] = meshgrid(y,x); 
+  
+ F=sin(pi*((X-ax)/(bx-ax))).*cos(pi/2*(2*((Y-ay)/(by-ay))+1));
+ F=-F;
+% The solution grid of the given problem for initial guesses are set up in
+% the Matrix U
+U = ones(m+2,n+2); % This sets up solution grid with all the places with ones 
+                   % set up for first iteration
+                   
+
+%% This section of the code applies the necessary boundary conditions provided on the 
+%problem statement
+
+% boundary conditions at the bottom of the grid at y = -pi
+ ubottom = -pi*(by+pi)^2+((x-ax)/(bx-ax)).*(-(by+pi)^2+pi*(by+pi)^2); %this is the boundary condition for y=-pi 
+                       % and all x's 
+                       
+ 
+% boundary condition on the right hand side of the solution grid at x=pi
+  uright = y.*(by-y).^2;
+  
+ %left hand side boundary condition
+  
+ 
+ uleft = ((by-y).^2).*cos(pi*y/by);%boundary condition evaluated at x=-pi
+                                  %for all y's
+
+  % increments in x and y directions are set up in the following lines
+  
+  
+  dx = (2*pi)/m;
+  dy = (2*pi)/n;
+ 
+  
+ % calculations of Diagonal and other respective Multipliers based on the 
+ %Gauss-Seidel Descretization used
+  
+ A = 1/dx^2;
+ B = 1/dy^2;
+ C = -((2*A)+(2*B));
+ 
+ % Applying the BC's on the top of the solution grid
+  U(1,:)   = B*ubottom;
+  
+ 
+ % Applying the BC's on the left side of the solution grid
+ U(:,1) = A*uleft;
+ 
+ % Applying the boundary conditions at the riht side of the Grid
+ U(:,end) = y.*(by-y).^2;
+  
+  %% The Neuman conditions are applied at the top of the solution grid
+  
+  % right side of the grid U will be computed using preset values
+  
+  err = 100; % Initial error ; it could be anything
+  
+  
+  tic % This is where we set up our timer to calculate the total time
+      % for iterations
+      
+  Er_iterations=0; % counting number of iterations for error calulation
+  
+  
+  while err > 1E-7  % Setting up loop for error calculation
+  P=U; % Setting up matrix for error calculation
+  
+  % We apply Neumann Boundary conditions at this part of the code ie before
+  % first set of iterations begin
+  
+ for j = 2:n+1
+        U(1,j) = (1/C)*(-F(1,j) - (2*B)*U(2,j) - A*U(1,j-1) - A*U(1,j+1) );
+end
+
+ 
+  %% Here we solve our new set of U's after the Neumann condition has been
+  % applies
+  
+  gauss_counter = 0; %setting up counter for gauss iterations
+  
+  % calculation of internal solution grid using for loops
+  
+  for k = 2:m+1
+    for j = 2:n+1
+         U(j,k) = (1/C)*(- F(j,k) - A*U(j,k-1) - B*U(j-1,k) - A*U(j,k+1) - B*U(j+1,k));
+   gauss_counter = gauss_counter + 1;
+     end
+  end
+  
+  err = abs(max(max(((P-U)./P)))); % Calculation of maximumm error after 
+                                   % has been arrived at
+   
+  Er_iterations = Er_iterations + 1;
+  end
+  
+  %% PLOTS OF VARIOUS GRAPHS AS ASKED BY THE PROBLEM
+  surf(x,y,U)
+  xlabel('x-axis')
+  ylabel('y-axis')
+  zlabel('z-axis')
+  figure
+  
+  contour(x,y,U)
+  xlabel('x-axis')
+  ylabel('y-axis')
+
+  
+  toc % setting off the timer
+  
+  %% Displaying our Counters
+  
+  disp('error iterations:')
+  disp(Er_iterations)
+  
+  disp('Gauss_iterations')
+  disp(gauss_counter)
+  
+  
